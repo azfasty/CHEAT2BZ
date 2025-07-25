@@ -108,6 +108,38 @@ Section:NewToggle("cours t’as mère", "bztp sayer", function(state)
 end)
 
 
+local noclip = false
+local RunService = game:GetService("RunService")
+
+Section:NewKeybind("Noclip", "Appuie pour traverser les murs", Enum.KeyCode.F, function()
+	noclip = not noclip
+	print(noclip and "🚪 Noclip activé" or "🚧 Noclip désactivé")
+
+	local character = game.Players.LocalPlayer.Character
+	if not character then return end
+
+	if noclip then
+		-- Activer le noclip à chaque frame
+		RunService.Stepped:Connect(function()
+			if noclip and character then
+				for _, part in pairs(character:GetDescendants()) do
+					if part:IsA("BasePart") and part.CanCollide == true then
+						part.CanCollide = false
+					end
+				end
+			end
+		end)
+	else
+		-- Désactiver le noclip
+		for _, part in pairs(character:GetDescendants()) do
+			if part:IsA("BasePart") then
+				part.CanCollide = true
+			end
+		end
+	end
+end)
+
+
 local Tab = Window:NewTab("PLAYERS")
 
 
