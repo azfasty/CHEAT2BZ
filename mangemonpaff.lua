@@ -139,6 +139,93 @@ Section:NewKeybind("Noclip", "Appuie pour traverser les murs", Enum.KeyCode.F, f
 	end
 end)
 
+----------##############
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local player = game.Players.LocalPlayer
+local mouse = player:GetMouse()
+
+local flying = false
+local speed = 50
+local flyConnection
+
+local function startFly()
+    local character = player.Character or player.CharacterAdded:Wait()
+    local hrp = character:WaitForChild("HumanoidRootPart")
+    local humanoid = character:WaitForChild("Humanoid")
+
+    humanoid.PlatformStand = true -- Désactive physique standard (chute, gravité)
+
+    flyConnection = RunService.RenderStepped:Connect(function()
+        if not flying then return end
+
+        local moveVector = Vector3.new(0, 0, 0)
+
+        -- Récupère les touches ZQSD (WASD) pour déplacement
+        if UserInputService:IsKeyDown(Enum.KeyCode.W) then
+            moveVector = moveVector + (workspace.CurrentCamera.CFrame.LookVector)
+        end
+        if UserInputService:IsKeyDown(Enum.KeyCode.S) then
+            moveVector = moveVector - (workspace.CurrentCamera.CFrame.LookVector)
+        end
+        if UserInputService:IsKeyDown(Enum.KeyCode.A) then
+            moveVector = moveVector - (workspace.CurrentCamera.CFrame.RightVector)
+        end
+        if UserInputService:IsKeyDown(Enum.KeyCode.D) then
+            moveVector = moveVector + (workspace.CurrentCamera.CFrame.RightVector)
+        end
+
+        -- Montée / Descente avec E (haut) et Q (bas)
+        if UserInputService:IsKeyDown(Enum.KeyCode.E) then
+            moveVector = moveVector + Vector3.new(0, 1, 0)
+        end
+        if UserInputService:IsKeyDown(Enum.KeyCode.Q) then
+            moveVector = moveVector - Vector3.new(0, 1, 0)
+        end
+
+        -- Normalize pour garder la vitesse constante quand diagonal
+        if moveVector.Magnitude > 0 then
+            moveVector = moveVector.Unit * speed
+        end
+
+        -- Applique la vélocité
+        hrp.Velocity = moveVector
+        hrp.RotVelocity = Vector3.new(0, 0, 0) -- pour éviter rotation bizarre
+    end)
+end
+
+local function stopFly()
+    flying = false
+    local character = player.Character
+    if not character then return end
+    local hrp = character:FindFirstChild("HumanoidRootPart")
+    local humanoid = character:FindFirstChild("Humanoid")
+    if hrp then
+        hrp.Velocity = Vector3.new(0, 0, 0)
+    end
+    if humanoid then
+        humanoid.PlatformStand = false
+    end
+    if flyConnection then
+        flyConnection:Disconnect()
+        flyConnection = nil
+    end
+end
+
+-- Keybind toggle Fly (ici avec ta Section:NewKeybind)
+Section:NewKeybind("Fly toggle", "Appuie sur F pour fly / atterrir", Enum.KeyCode.F, function()
+    flying = not flying
+    if flying then
+        print("✈️ Fly activé")
+        startFly()
+    else
+        print("🛬 Fly désactivé")
+        stopFly()
+    end
+end)
+
+-----------##########
+
 
 local Tab = Window:NewTab("PLAYERS")
 local Section = Tab:NewSection("PLAYERS")
