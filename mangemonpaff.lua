@@ -106,3 +106,13 @@ Section:NewToggle("cours t’as mère", "bztp sayer", function(state)
 
     applySpeed(humanoid)
 end)
+
+
+
+
+
+
+local Tab = Window:NewTab("SETTINGS")
+Section:NewKeybind("Touch pour ouvrit la triso V3", "BZTP", Enum.KeyCode.F, function()
+    Library:ToggleUI()
+end)
