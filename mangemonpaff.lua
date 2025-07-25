@@ -143,8 +143,60 @@ end)
 local Tab = Window:NewTab("PLAYERS")
 local Section = Tab:NewSection("PLAYERS")
 
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local targetName = nil
+
+-- TextBox pour entrer le pseudo du joueur
 Section:NewTextBox("Player", "Met ton joueur fdp", function(txt)
-	print(txt)
+    targetName = txt
+    print("👤 Joueur ciblé :", targetName)
+end)
+
+-- Bouton Steal Outfit
+Section:NewButton("Steal Outfit", "Vole son drip 💀", function()
+    if not targetName then
+        warn("⚠️ Aucun joueur entré")
+        return
+    end
+
+    local target = Players:FindFirstChild(targetName)
+    if not target then
+        warn("❌ Joueur introuvable")
+        return
+    end
+
+    local targetCharacter = target.Character
+    local myCharacter = player.Character
+    if not (targetCharacter and myCharacter) then
+        warn("❌ Les deux personnages doivent être chargés")
+        return
+    end
+
+    -- Supprimer les accessoires et vêtements existants
+    for _, item in ipairs(myCharacter:GetChildren()) do
+        if item:IsA("Accessory") or item:IsA("Shirt") or item:IsA("Pants") or item:IsA("CharacterMesh") then
+            item:Destroy()
+        end
+    end
+
+    -- Copier accessoires et vêtements
+    for _, item in ipairs(targetCharacter:GetChildren()) do
+        if item:IsA("Accessory") or item:IsA("Shirt") or item:IsA("Pants") or item:IsA("CharacterMesh") then
+            local clone = item:Clone()
+            clone.Parent = myCharacter
+        end
+    end
+
+    -- Copier HumanoidDescription pour plus de fiabilité (si R15)
+    local humanoid = myCharacter:FindFirstChildOfClass("Humanoid")
+    local targetHumanoid = targetCharacter:FindFirstChildOfClass("Humanoid")
+    if humanoid and targetHumanoid then
+        local description = targetHumanoid:GetAppliedDescription()
+        humanoid:ApplyDescription(description)
+    end
+
+    print("✅ Outfit volé à :", targetName)
 end)
 
 
