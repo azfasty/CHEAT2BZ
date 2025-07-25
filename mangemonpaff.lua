@@ -42,3 +42,18 @@ Section:NewToggle("TU T'ENVOLES DANS LE CIEL ", "DEBUG BY INTERPOL 👹", functi
         end
     end
 end)
+local normalSpeed = 16 -- vitesse normale de Roblox
+local fastSpeed = 100 -- vitesse quand activé
+
+Section:NewToggle("cours t’as mère", "bztp sayer", function(state)
+    local character = player.Character or player.CharacterAdded:Wait()
+    local humanoid = character:WaitForChild("Humanoid")
+
+    if state then
+        print("⚡ Vitesse activée")
+        humanoid.WalkSpeed = fastSpeed
+    else
+        print("🐢 Vitesse normale")
+        humanoid.WalkSpeed = normalSpeed
+    end
+end)
