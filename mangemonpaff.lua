@@ -108,6 +108,7 @@ Section:NewToggle("cours t’as mère", "bztp sayer", function(state)
 end)
 
 
+local Tab = Window:NewTab("PLAYERS")
 
 
 
