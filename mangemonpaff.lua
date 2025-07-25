@@ -113,6 +113,7 @@ end)
 
 
 local Tab = Window:NewTab("SETTINGS")
-Section:NewKeybind("Touch pour ouvrit la triso V3", "BZTP", Enum.KeyCode.F, function()
+local Section = Tab:NewSection("BINDS")
+Section:NewKeybind("Touche pour m'ouvrir 😇", "Chez ton père", Enum.KeyCode.F, function()
     Library:ToggleUI()
 end)
