@@ -11,17 +11,63 @@ local player = game.Players.LocalPlayer
 local hrp
 local flyConnection
 
--- Fonction pour toujours récupérer le HumanoidRootPart actuel
-local function getHRP()
-	local character = player.Character or player.CharacterAdded:Wait()
-	return character:WaitForChild("HumanoidRootPart")
+-- Variables pour la vitesse
+local normalSpeed = 16
+local fastSpeed = 100
+local speedToggleOn = false
+
+-- Fonction pour récupérer le HumanoidRootPart à chaque fois (respawn inclus)
+local function updateCharacterParts()
+    local character = player.Character or player.CharacterAdded:Wait()
+    hrp = character:WaitForChild("HumanoidRootPart")
+    local humanoid = character:WaitForChild("Humanoid")
+    return character, humanoid
 end
 
+-- Appliquer la vitesse en fonction du toggle
+local function applySpeed(humanoid)
+    if speedToggleOn then
+        humanoid.WalkSpeed = fastSpeed
+    else
+        humanoid.WalkSpeed = normalSpeed
+    end
+end
+
+-- Initial setup au lancement
+local character, humanoid = updateCharacterParts()
+applySpeed(humanoid)
+
+-- Écoute le respawn du personnage
+player.CharacterAdded:Connect(function(char)
+    hrp = char:WaitForChild("HumanoidRootPart")
+    humanoid = char:WaitForChild("Humanoid")
+    
+    -- Reconnecter le vol si actif
+    if flying then
+        if flyConnection then
+            flyConnection:Disconnect()
+            flyConnection = nil
+        end
+        flyConnection = RunService.RenderStepped:Connect(function()
+            if flying and hrp then
+                hrp.Velocity = Vector3.new(0, speed, 0)
+            end
+        end)
+    end
+
+    -- Re-appliquer la vitesse
+    applySpeed(humanoid)
+end)
+
+-- Toggle vol
 Section:NewToggle("TU T'ENVOLES DANS LE CIEL ", "DEBUG BY INTERPOL 👹", function(state)
     if state then
         print("Toggle On")
         flying = true
-        hrp = getHRP()
+        hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+        if not hrp then
+            hrp = player.CharacterAdded:Wait():WaitForChild("HumanoidRootPart")
+        end
 
         flyConnection = RunService.RenderStepped:Connect(function()
             if flying and hrp then
@@ -36,32 +82,22 @@ Section:NewToggle("TU T'ENVOLES DANS LE CIEL ", "DEBUG BY INTERPOL 👹", functi
             flyConnection = nil
         end
 
-        -- Toujours vérifier si le personnage est encore là avant de modifier sa vitesse
         if hrp then
             hrp.Velocity = Vector3.new(0, 0, 0)
         end
     end
 end)
-local speedToggleOn = false
 
+-- Toggle vitesse
 Section:NewToggle("cours t’as mère", "bztp sayer", function(state)
     speedToggleOn = state
-    local character = player.Character or player.CharacterAdded:Wait()
-    local humanoid = character:WaitForChild("Humanoid")
+    local character, humanoid = updateCharacterParts()
 
     if state then
         print("⚡ Vitesse activée")
-        humanoid.WalkSpeed = fastSpeed
     else
         print("🐢 Vitesse normale")
-        humanoid.WalkSpeed = normalSpeed
     end
-end)
 
--- Appliquer la vitesse rapide automatiquement au respawn si toggle activé
-player.CharacterAdded:Connect(function(character)
-    if speedToggleOn then
-        local humanoid = character:WaitForChild("Humanoid")
-        humanoid.WalkSpeed = fastSpeed
-    end
+    applySpeed(humanoid)
 end)
