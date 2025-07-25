@@ -1,5 +1,5 @@
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
-local Window = Library.CreateLib("LE KZ", "DarkTheme")
+local Window = Library.CreateLib("LE TRISO V6", "DarkTheme")
 local Tab = Window:NewTab("LE PAFF A NEYZ")
 local Section = Tab:NewSection("LE ZIZOU ESP")
 
@@ -58,6 +58,14 @@ player.CharacterAdded:Connect(function(char)
     -- Re-appliquer la vitesse
     applySpeed(humanoid)
 end)
+
+----
+Section:NewKeybind("Touch pour ouvrit la triso V3", "BZTP", Enum.KeyCode.F, function()
+	Library:ToggleUI()
+end)
+
+
+---
 
 -- Toggle vol
 Section:NewToggle("TU T'ENVOLES DANS LE CIEL ", "DEBUG BY INTERPOL 👹", function(state)
