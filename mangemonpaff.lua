@@ -141,6 +141,7 @@ end)
 
 
 local Tab = Window:NewTab("PLAYERS")
+local Section = Tab:NewSection("PLAYERS")
 
 Section:NewTextBox("Player", "Met ton joueur fdp", function(txt)
 	print(txt)
