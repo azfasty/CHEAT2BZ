@@ -287,6 +287,101 @@ Section:NewButton("Steal Outfit", "Vole son drip 💀", function()
 end)
 
 
+local Tab = Window:NewTab("AIMBOT")
+local Section = Tab:NewSection("SETTINGS")
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local player = Players.LocalPlayer
+local mouse = player:GetMouse()
+
+local aimbotEnabled = false
+local target = nil
+local smooth = 10 -- Valeur par défaut du slider (plus grand = plus lent / smooth)
+local connection
+
+-- Fonction pour trouver la cible la plus proche sous le curseur
+local function getClosestTarget()
+    local closestPlayer = nil
+    local shortestDistance = math.huge
+
+    for _, plr in pairs(Players:GetPlayers()) do
+        if plr ~= player and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") and plr.Character:FindFirstChild("Humanoid") and plr.Character.Humanoid.Health > 0 then
+            local screenPos, onScreen = workspace.CurrentCamera:WorldToViewportPoint(plr.Character.HumanoidRootPart.Position)
+            if onScreen then
+                local dist = (Vector2.new(screenPos.X, screenPos.Y) - Vector2.new(mouse.X, mouse.Y)).Magnitude
+                if dist < shortestDistance then
+                    shortestDistance = dist
+                    closestPlayer = plr
+                end
+            end
+        end
+    end
+
+    return closestPlayer
+end
+
+-- Fonction pour smooth look at target
+local function aimAtTarget()
+    if not target or not target.Character or not target.Character:FindFirstChild("HumanoidRootPart") then return end
+    local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+
+    local targetPos = target.Character.HumanoidRootPart.Position
+    local currentCFrame = workspace.CurrentCamera.CFrame
+    local direction = (targetPos - currentCFrame.Position).Unit
+
+    -- Calcul du CFrame à interpoler
+    local newCFrame = CFrame.new(currentCFrame.Position, currentCFrame.Position + direction)
+    -- Lerp pour smooth
+    workspace.CurrentCamera.CFrame = workspace.CurrentCamera.CFrame:Lerp(newCFrame, 1 / smooth)
+end
+
+-- Toggle aimbot
+Section:NewToggle("Aimbot Toggle", "Active/désactive l'aimbot", function(state)
+    aimbotEnabled = state
+    print(state and "Aimbot activé" or "Aimbot désactivé")
+
+    if not aimbotEnabled and connection then
+        connection:Disconnect()
+        connection = nil
+        target = nil
+    end
+end)
+
+-- Keybind pour locker la cible la plus proche
+Section:NewKeybind("Lock Target", "Verrouille la cible la plus proche", Enum.KeyCode.F, function()
+    if not aimbotEnabled then
+        print("⚠️ Active d'abord l'aimbot")
+        return
+    end
+
+    target = getClosestTarget()
+    if target then
+        print("🎯 Cible verrouillée sur :", target.Name)
+        -- Commence à suivre la cible en continu
+        if connection then connection:Disconnect() end
+        connection = RunService.RenderStepped:Connect(function()
+            if aimbotEnabled and target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+                aimAtTarget()
+            else
+                target = nil
+                if connection then
+                    connection:Disconnect()
+                    connection = nil
+                end
+            end
+        end)
+    else
+        print("❌ Aucune cible trouvée")
+    end
+end)
+
+-- Slider pour smoothness
+Section:NewSlider("Smoothness", "Régle la vitesse de rotation (plus bas = plus rapide)", 100, 1, function(s)
+    smooth = s
+    print("Smooth réglé sur :", smooth)
+end)
 
 
 
