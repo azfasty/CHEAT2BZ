@@ -1,7 +1,7 @@
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
-local Window = Library.CreateLib("LE TRISO V6", "DarkTheme")
-local Tab = Window:NewTab("LE PAFF A NEYZ")
-local Section = Tab:NewSection("LE ZIZOU ESP")
+local Window = Library.CreateLib("ICE SPICE", "DarkTheme")
+local Tab = Window:NewTab("MAIN")
+local Section = Tab:NewSection("SELF")
 
 local flying = false
 local speed = 50
@@ -60,9 +60,6 @@ player.CharacterAdded:Connect(function(char)
 end)
 
 ----
-Section:NewKeybind("Touch pour ouvrit la triso V3", "BZTP", Enum.KeyCode.F, function()
-	Library:ToggleUI()
-end)
 
 
 ---
