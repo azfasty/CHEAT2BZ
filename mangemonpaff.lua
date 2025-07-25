@@ -42,10 +42,10 @@ Section:NewToggle("TU T'ENVOLES DANS LE CIEL ", "DEBUG BY INTERPOL 👹", functi
         end
     end
 end)
-local normalSpeed = 16 -- vitesse normale de Roblox
-local fastSpeed = 100 -- vitesse quand activé
+local speedToggleOn = false
 
 Section:NewToggle("cours t’as mère", "bztp sayer", function(state)
+    speedToggleOn = state
     local character = player.Character or player.CharacterAdded:Wait()
     local humanoid = character:WaitForChild("Humanoid")
 
@@ -55,5 +55,13 @@ Section:NewToggle("cours t’as mère", "bztp sayer", function(state)
     else
         print("🐢 Vitesse normale")
         humanoid.WalkSpeed = normalSpeed
+    end
+end)
+
+-- Appliquer la vitesse rapide automatiquement au respawn si toggle activé
+player.CharacterAdded:Connect(function(character)
+    if speedToggleOn then
+        local humanoid = character:WaitForChild("Humanoid")
+        humanoid.WalkSpeed = fastSpeed
     end
 end)
