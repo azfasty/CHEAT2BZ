@@ -1,5 +1,5 @@
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
-local Window = Library.CreateLib("ICE SPICE V1", "DarkTheme")
+local Window = Library.CreateLib("ICE SPICE V1", "BloodTheme")
 local Tab = Window:NewTab("MAIN")
 local Section = Tab:NewSection("SELF")
 
