@@ -139,6 +139,40 @@ Section:NewKeybind("Noclip", "Appuie pour traverser les murs", Enum.KeyCode.F, f
 	end
 end)
 
+local flingActive = false
+local flingConnection
+
+Section:NewToggle("Fling", "Tas deja une toupie ? bah cest comme ca mon sangg 🩸", function(state)
+    local character = game.Players.LocalPlayer.Character or game.Players.LocalPlayer.CharacterAdded:Wait()
+    local hrp = character:WaitForChild("HumanoidRootPart")
+
+    flingActive = state
+
+    if flingActive then
+        print("🌀 Fling activé")
+        flingConnection = game:GetService("RunService").Heartbeat:Connect(function()
+            if hrp then
+                -- Donne une rotation extrême
+                hrp.RotVelocity = Vector3.new(9999, 9999, 9999)
+                -- Optionnel : empêche la physique de ralentir
+                hrp.AssemblyAngularVelocity = Vector3.new(9999, 9999, 9999)
+            end
+        end)
+    else
+        print("🛑 Fling désactivé")
+        if flingConnection then
+            flingConnection:Disconnect()
+            flingConnection = nil
+        end
+
+        -- Remet la rotation à 0
+        if hrp then
+            hrp.RotVelocity = Vector3.zero
+            hrp.AssemblyAngularVelocity = Vector3.zero
+        end
+    end
+end)
+
 ----------##############
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
