@@ -457,7 +457,138 @@ Section:NewSlider("Smoothness", "Régle la vitesse de rotation (plus bas = plus 
     print("Smooth réglé sur :", smooth)
 end)
 
+local Tab = Window:NewTab("ESP2BZ")
+local Section = Tab:NewSection("ESP 2 BZ 😇🔥🔥 #PASVUPASPRIS")
 
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local camera = workspace.CurrentCamera
+local localPlayer = Players.LocalPlayer
+
+-- Stockage des Drawing objets
+local lineESPEnabled = false
+local skeletonESPEnabled = false
+local drawings = {}
+
+-- Supprimer tous les dessins existants
+local function clearESP()
+	for _, obj in pairs(drawings) do
+		if typeof(obj) == "table" then
+			for _, v in pairs(obj) do
+				if v.Remove then v:Remove() end
+			end
+		elseif obj.Remove then
+			obj:Remove()
+		end
+	end
+	table.clear(drawings)
+end
+
+-- Fonction pour update les lignes
+local function updateESP()
+	clearESP()
+
+	for _, player in pairs(Players:GetPlayers()) do
+		if player ~= localPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") and player.Character:FindFirstChild("Humanoid") and player.Character.Humanoid.Health > 0 then
+			local character = player.Character
+			local hrp = character:FindFirstChild("HumanoidRootPart")
+
+			-- Line ESP
+			if lineESPEnabled then
+				local line = Drawing.new("Line")
+				line.Color = Color3.new(1, 1, 1)
+				line.Thickness = 1
+				line.Transparency = 1
+				line.ZIndex = 2
+				drawings[player.Name .. "_line"] = line
+			end
+
+			-- Skeleton ESP
+			if skeletonESPEnabled then
+				local parts = {
+					"Head", "Torso", "HumanoidRootPart",
+					"Left Arm", "Right Arm", "Left Leg", "Right Leg",
+					"LeftUpperArm", "RightUpperArm", "LeftLowerArm", "RightLowerArm",
+					"LeftUpperLeg", "RightUpperLeg", "LeftLowerLeg", "RightLowerLeg"
+				}
+				drawings[player.Name .. "_skeleton"] = {}
+				for _, partName in pairs(parts) do
+					local part = character:FindFirstChild(partName)
+					if part then
+						local dot = Drawing.new("Circle")
+						dot.Radius = 2
+						dot.Filled = true
+						dot.Color = Color3.new(0, 1, 0)
+						dot.Visible = true
+						drawings[player.Name .. "_skeleton"][partName] = dot
+					end
+				end
+			end
+		end
+	end
+end
+
+-- Loop de rendu
+RunService.RenderStepped:Connect(function()
+	if not (lineESPEnabled or skeletonESPEnabled) then return end
+
+	for _, player in pairs(Players:GetPlayers()) do
+		if player ~= localPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") and player.Character:FindFirstChild("Humanoid") and player.Character.Humanoid.Health > 0 then
+			local character = player.Character
+			local hrp = character:FindFirstChild("HumanoidRootPart")
+
+			-- Update Line
+			if lineESPEnabled and drawings[player.Name .. "_line"] then
+				local screenPos, onScreen = camera:WorldToViewportPoint(hrp.Position)
+				local myHRP = localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart")
+				if myHRP then
+					local myScreen, myOnScreen = camera:WorldToViewportPoint(myHRP.Position)
+					local line = drawings[player.Name .. "_line"]
+					line.From = Vector2.new(myScreen.X, myScreen.Y)
+					line.To = Vector2.new(screenPos.X, screenPos.Y)
+					line.Visible = onScreen and myOnScreen
+				end
+			end
+
+			-- Update Skeleton
+			if skeletonESPEnabled and drawings[player.Name .. "_skeleton"] then
+				for partName, dot in pairs(drawings[player.Name .. "_skeleton"]) do
+					local part = character:FindFirstChild(partName)
+					if part then
+						local pos, onScreen = camera:WorldToViewportPoint(part.Position)
+						dot.Position = Vector2.new(pos.X, pos.Y)
+						dot.Visible = onScreen
+					else
+						dot.Visible = false
+					end
+				end
+			end
+		else
+			-- Hide ESP if player invalid
+			if drawings[player.Name .. "_line"] then
+				drawings[player.Name .. "_line"].Visible = false
+			end
+			if drawings[player.Name .. "_skeleton"] then
+				for _, dot in pairs(drawings[player.Name .. "_skeleton"]) do
+					dot.Visible = false
+				end
+			end
+		end
+	end
+end)
+
+
+Section:NewToggle("Lines", "#OMERTA47", function(state)
+    lineESPEnabled = state
+    print(state and "📡 Lines ON" or "📡 Lines OFF")
+    updateESP()
+end)
+
+Section:NewToggle("Skeleton", "Crari tu fais le cheateur a mettre les skeleton", function(state)
+    skeletonESPEnabled = state
+    print(state and "💀 Skeleton ON" or "💀 Skeleton OFF")
+    updateESP()
+end)
 
 local Tab = Window:NewTab("SETTINGS")
 local Section = Tab:NewSection("BINDS")
