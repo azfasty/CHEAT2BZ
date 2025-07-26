@@ -224,6 +224,46 @@ Section:NewKeybind("Fly toggle", "Appuie sur F pour fly / atterrir", Enum.KeyCod
     end
 end)
 
+local invisible = false
+local savedParts = {}
+
+Section:NewToggle("Invisiblw", "Tu deviens noir starfalalah", function(state)
+    local character = game.Players.LocalPlayer.Character or game.Players.LocalPlayer.CharacterAdded:Wait()
+
+    if state then
+        invisible = true
+        print("🫥 Tu es invisible")
+
+        -- Sauvegarde et rend tous les MeshParts et accessoires transparents
+        for _, part in pairs(character:GetDescendants()) do
+            if part:IsA("BasePart") or part:IsA("Decal") then
+                savedParts[part] = part.Transparency
+                part.Transparency = 1
+                if part:IsA("BasePart") then
+                    part.CanCollide = false
+                end
+            elseif part:IsA("Accessory") then
+                part:Destroy()
+            end
+        end
+    else
+        invisible = false
+        print("👁️ Tu es visible")
+
+        -- Restaure la transparence précédente
+        for part, transparency in pairs(savedParts) do
+            if part and part.Parent then
+                part.Transparency = transparency
+                if part:IsA("BasePart") then
+                    part.CanCollide = true
+                end
+            end
+        end
+
+        savedParts = {} -- Reset
+    end
+end)
+
 -----------##########
 
 
